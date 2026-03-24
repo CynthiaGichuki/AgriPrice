@@ -11,8 +11,8 @@ mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
 app = FastAPI(title="AgriPrice: Chained Inference API")
 
-# 2. Load the Artifacts (Enables the 'Handshake')
-# These must match the names saved in your training_pipeline.py
+# 2. Load the Artifacts
+# These must match the names saved in the training_pipeline.py
 model_ws = joblib.load("model_wholesale.joblib")
 enc_ws = joblib.load("encoder_wholesale.joblib")
 model_rt = joblib.load("model_retail.joblib")
@@ -42,7 +42,7 @@ def get_chained_prediction(data: PriceRequest):
 
     # Base Categorical Data
     cat_list = [data.commodity, data.classification, data.market, data.county, data.unit]
-    categorical_cols = ['Commodity', 'Classification', 'Market', 'County', 'Unit']
+    #categorical_cols = ['Commodity', 'Classification', 'Market', 'County', 'Unit']
 
     # --- B. STAGE 1: Predict Wholesale ---
     # 1. Encode categories using the Wholesale Encoder
@@ -57,7 +57,7 @@ def get_chained_prediction(data: PriceRequest):
     predicted_wholesale = np.expm1(log_ws_pred)
 
     # --- C. STAGE 2: Predict Retail ---
-    # 1. Encode categories using the Retail Encoder (might be different codes!)
+    # 1. Encode categories using the Retail Encoder
     cat_enc_rt = enc_rt.transform([cat_list])[0]
     
     # 2. Combine: encoded cats + time features + PREDICTED wholesale

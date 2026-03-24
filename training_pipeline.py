@@ -3,7 +3,7 @@ import numpy as np
 import mlflow
 import mlflow.sklearn
 import os
-import joblib
+import joblib #save models and encoders for reuse
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.metrics import mean_squared_error, r2_score
@@ -45,25 +45,35 @@ def train_models():
     categorical_cols = ['Commodity', 'Classification', 'Market', 'County', 'Unit']
     time_features = ['Month', 'Year', 'DayOfWeek', 'WeekOfYear']
 
-    # ================================================================
-    # STAGE 1: Wholesale Model (Independent Features only)
-    # ================================================================
+    # Wholesale Model (Independent Features only)
     ws_features = categorical_cols + time_features
 
+    #features and target for wholesale model
     X_ws = df[ws_features]
     y_ws = df['Log_Wholesale']
 
+    # Train-test split for wholesale model
     X_train_ws, X_test_ws, y_train_ws, y_test_ws = train_test_split(
         X_ws, y_ws, test_size=0.2, random_state=42
     )
 
+    #initialize and fit the ordinal encoder for wholesale model
     enc_ws = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
+
+    # creates copies of training and rest data 
     X_train_ws_enc = X_train_ws.copy()
     X_test_ws_enc  = X_test_ws.copy()
+
+    #Taking only the categorical columns from the training data
+    #converting them to string type 
+    #fit the encoder
     X_train_ws_enc[categorical_cols] = enc_ws.fit_transform(X_train_ws[categorical_cols].astype(str))
     X_test_ws_enc[categorical_cols]  = enc_ws.transform(X_test_ws[categorical_cols].astype(str))
+
+    #save the encoder
     joblib.dump(enc_ws, "encoder_wholesale.joblib")
 
+    #start an mlflow run 
     with mlflow.start_run(run_name="Stage1_Wholesale_XGB"):
         model_ws = XGBRegressor(
             n_estimators=1000, max_depth=10, learning_rate=0.02,
@@ -88,9 +98,7 @@ def train_models():
         print(f"Wholesale Model Stage 1 — RMSE: {rmse_ws:.2f} | R2: {r2_ws:.4f}")
         print("-" * 40)
 
-    # ================================================================
-    # STAGE 2: Retail Model (Uses Wholesale as a high-fidelity signal)
-    # ================================================================
+    # Retail Model (Uses Wholesale as a high-fidelity signal)
     rt_features = categorical_cols + time_features + ['Wholesale']
 
     X_rt = df[rt_features]
@@ -101,10 +109,13 @@ def train_models():
     )
 
     enc_rt = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
+
     X_train_rt_enc = X_train_rt.copy()
     X_test_rt_enc  = X_test_rt.copy()
+
     X_train_rt_enc[categorical_cols] = enc_rt.fit_transform(X_train_rt[categorical_cols].astype(str))
     X_test_rt_enc[categorical_cols]  = enc_rt.transform(X_test_rt[categorical_cols].astype(str))
+    
     joblib.dump(enc_rt, "encoder_retail.joblib")
 
     with mlflow.start_run(run_name="Stage2_Retail_XGB"):
