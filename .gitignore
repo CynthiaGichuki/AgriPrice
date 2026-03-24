@@ -1,3 +1,19 @@
+# MLflow database
+mlflow.db
+
+# MLflow runs
 mlruns/
-.venv/
+
+# Trained model files
+*.joblib
+*.pkl
+
+# Python cache
 __pycache__/
+*.pyc
+
+raw_data/
+*.zip
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
