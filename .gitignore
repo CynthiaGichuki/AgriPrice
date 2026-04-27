@@ -17,3 +17,5 @@ raw_data/
 
 # Jupyter checkpoints
 .ipynb_checkpoints/
+
+.env
