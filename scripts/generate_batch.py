@@ -11,7 +11,7 @@ def generate():
     
     # --- FEATURE ENGINEERING (Fixes the KeyError) ---
     # Convert 'Date' string to datetime objects and extract the required features
-    df['Date'] = pd.to_datetime(df['Date'])
+    df['Date'] = pd.to_datetime(df['Date'], format='mixed', dayfirst=True)
     df['Month'] = df['Date'].dt.month
     df['Year'] = df['Date'].dt.year
     df['DayOfWeek'] = df['Date'].dt.dayofweek
