@@ -14,7 +14,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # 2. Adminer: Web interface to check SQL tables during the demo
+  # 2. Adminer: Web interface to check SQL tables
   adminer:
     image: adminer
     container_name: agriprice-adminer

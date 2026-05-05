@@ -1,18 +1,18 @@
 import os
 import glob
 from datetime import datetime
-import pandas as pd
+import pandas as pd 
 import psycopg
 import numpy as np
 from sklearn.metrics import mean_squared_error, r2_score
 from scipy.stats import ks_2samp
 
-# 1. Update features to match your AgriPrice project
+# 1. Update features to match the AgriPrice project
 # We monitor numerical features for distribution drift
 FEATURES = ["Wholesale", "Month", "Year", "DayOfWeek"]
 
 def main():
-    # load reference data (your baseline training set)
+    # load reference data (baseline training set)
     reference = pd.read_csv("data/reference.csv")
 
     # load latest batch of production logs
@@ -27,7 +27,7 @@ def main():
     # 2. Compute Data Drift (Numerical features via K-S test)
     drifted_features = 0
     for feature in FEATURES:
-        # KS test detects if the production data distribution has shifted [cite: 11, 26, 536]
+        # KS test detects if the production data distribution has shifted 
         _, p_value = ks_2samp(reference[feature], current[feature])
         if p_value < 0.05: 
             drifted_features += 1
@@ -35,12 +35,12 @@ def main():
     share_drifted = drifted_features / len(FEATURES)
 
     # 3. Compute Regression Performance (KES Prices)
-    # Use RMSE and R2 instead of Accuracy/F1 [cite: 58]
-    # 'Retail' is your target, 'prediction' is your Stage 2 output
+    # Use RMSE and R2 
+    # 'Retail' is the target, 'prediction' is the Stage 2 output
     rmse = np.sqrt(mean_squared_error(current["Retail"], current["prediction"]))
     r2 = r2_score(current["Retail"], current["prediction"])
 
-    # connect to Postgres using your .env credentials
+    # connect to Postgres using the .env credentials
     conn = psycopg.connect(
         host=os.getenv("POSTGRES_HOST", "localhost"),
         port=os.getenv("POSTGRES_PORT", "5432"),
