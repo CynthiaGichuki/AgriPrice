@@ -115,7 +115,6 @@ def train_models():
 
     X_train_rt_enc[categorical_cols] = enc_rt.fit_transform(X_train_rt[categorical_cols].astype(str))
     X_test_rt_enc[categorical_cols]  = enc_rt.transform(X_test_rt[categorical_cols].astype(str))
-    
     joblib.dump(enc_rt, "encoder_retail.joblib")
 
     with mlflow.start_run(run_name="Stage2_Retail_XGB"):
