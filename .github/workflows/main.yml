@@ -51,11 +51,10 @@ jobs:
 
       - name: Build and Tag Docker image
         run: |
-          # Use lowercase for your username/repo to avoid GHCR errors
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/agriprice-predict-service
+          IMAGE_NAME=ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/agriprice-predict-service
           docker build -t $IMAGE_NAME:latest .
 
       - name: Push Docker image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/agriprice-predict-service
+          IMAGE_NAME=ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/agriprice-predict-service
           docker push $IMAGE_NAME:latest
