@@ -1,14 +1,17 @@
-FROM python:3.9
+FROM python:3.12-slim
 
 WORKDIR /app
 
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY predict.py .
-COPY label_encoders.pkl .
 
-RUN pip install mlflow fastapi uvicorn pandas numpy scikit-learn joblib
-
-ENV MLFLOW_TRACKING_URI=http://host.docker.internal:5050
-ENV MLFLOW_REGISTRY_URI=http://host.docker.internal:5050
+# Model artifacts (*.joblib) are NOT baked into the image.
+# Mount them at runtime or COPY them here after training:
+#   COPY *.joblib .
+# Example runtime mount:
+#   docker run -v /path/to/models:/app -p 8000:8000 <image>
 
 EXPOSE 8000
 
