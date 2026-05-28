@@ -30,14 +30,14 @@ def create_test_artifacts():
 
     # Wholesale model: 5 encoded categoricals + 4 time features = 9 features
     enc_ws = OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
-    X_ws = np.hstack([enc_ws.fit_transform(cat_df), time_arr])
+    X_ws = np.hstack([enc_ws.fit_transform(cat_df.values), time_arr])
     y_ws = np.log1p(rng.uniform(50, 500, n))
     model_ws = XGBRegressor(n_estimators=10, max_depth=2, random_state=42)
     model_ws.fit(X_ws, y_ws)
 
     # Retail model: same 9 features + wholesale price = 10 features
     enc_rt = OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
-    X_rt = np.hstack([enc_rt.fit_transform(cat_df), time_arr, np.expm1(y_ws).reshape(-1, 1)])
+    X_rt = np.hstack([enc_rt.fit_transform(cat_df.values), time_arr, np.expm1(y_ws).reshape(-1, 1)])
     y_rt = y_ws + np.log1p(rng.uniform(10, 50, n))
     model_rt = XGBRegressor(n_estimators=10, max_depth=2, random_state=42)
     model_rt.fit(X_rt, y_rt)
@@ -54,3 +54,11 @@ def create_test_artifacts():
               "encoder_wholesale.joblib", "encoder_retail.joblib"]:
         if os.path.exists(f):
             os.remove(f)
+
+
+@pytest.fixture(scope="session")
+def api_client(create_test_artifacts):
+    """Provide a FastAPI test client — imported after mock models exist."""
+    from fastapi.testclient import TestClient
+    import predict
+    return TestClient(predict.app)
