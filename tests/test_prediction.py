@@ -35,8 +35,8 @@ def test_chained_inference_flow(models):
     assert prediction_rt > 0, "Retail price should be positive"
 
 
-# ── Input Validation ──────────────────────────────────────────────────────────
-
+# ── Input  Validation ──────────────────────────────────────────────────────────
+#sends only 3 features to the wholesale model, which expects 9
 def test_wholesale_wrong_feature_count_raises_error(models):
     """Wholesale model must reject input with the wrong number of features."""
     model_ws, _ = models
@@ -54,7 +54,7 @@ def test_retail_missing_wholesale_feature_raises_error(models):
 
 
 # ── Output Format and Range ───────────────────────────────────────────────────
-
+#API returns values in a JSON response that needs proper floats.
 def test_prediction_output_is_float(models):
     """Both model outputs must be plain Python floats."""
     model_ws, model_rt = models
@@ -68,7 +68,7 @@ def test_prediction_output_is_float(models):
     assert isinstance(ws_pred, float), "Wholesale prediction must be a float"
     assert isinstance(rt_pred, float), "Retail prediction must be a float"
 
-
+#realistic price range for Kenyan markets, not negative or astronomically high values.
 def test_predictions_within_realistic_kes_range(models):
     """Predicted prices must fall within a realistic Kenyan market range (1–100,000 KES)."""
     model_ws, model_rt = models
